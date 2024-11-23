@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Key</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px 5px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #key-output {
+            margin-top: 15px;
+            font-size: 18px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generate Your Key</h1>
+        <button id="generate-key">Generate Key</button>
+        <p id="key-output"></p>
+    </div>
+
+    <script>
+        // Referrer check: Ensure users came from the correct page
+        if (document.referrer.indexOf("https://linkvertise.com/633751/key-validation") === -1) {
+            alert("Invalid access. Please visit the previous page to access this feature.");
+            window.location.href = "https://linkvertise.com/633751/key-validation"; // Replace with the URL of the allowed referrer
+        }
+
+        document.getElementById('generate-key').onclick = function() {
+            fetch('https://script.google.com/macros/s/AKfycbxO58CLstFw2yZlmbngx_3dpu2gbDjIylR80QfQ6irzXo6UiUnk8XHM09R2DOKrrgLp/exec?action=generate') // Replace with your web app URL
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('key-output').textContent = "Your key: " + data.key;
+                })
+                .catch(error => console.log('Error generating key:', error));
+        };
+    </script>
+</body>
+</html>
