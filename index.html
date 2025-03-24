@@ -51,7 +51,7 @@
             left: -9999px;
         }
         #redirect-button {
-            display: none; /* Initially hide redirect button */
+            display: none;
         }
     </style>
 </head>
@@ -70,13 +70,13 @@
     </div>
 
     <script>
-        // Referrer check: Ensure users came from the correct page
-        if (document.referrer.indexOf("https://linkvertise.com/633751/key-validation") === -1) {
-            alert("Invalid access. Please visit the previous page to access this feature.");
-            window.location.href = "https://linkvertise.com/633751/key-validation"; // Redirect if referrer is not correct
+        // Correct Referrer Check
+        if (document.referrer.indexOf("https://www.techyscripts.top/p/bloxhub-key-system.html") === -1) {
+            alert("Invalid access. Please follow the correct steps to get the key.");
+            window.location.href = "https://www.techyscripts.top/p/how-to-get-key-for-blox-hub-scripts.html"; // Redirect invalid users
         }
 
-        // Delay showing the 'Generate Key' button for a short time (to trick bots)
+        // Delay showing the 'Generate Key' button
         setTimeout(function() {
             document.getElementById('generate-key').style.display = 'inline-block';
         }, 1000);
@@ -87,7 +87,6 @@
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('key-output').textContent = "Your key: " + data.key;
-                    // After generating key, show the redirect button
                     document.getElementById('redirect-button').style.display = 'inline-block';
                 })
                 .catch(error => console.log('Error generating key:', error));
