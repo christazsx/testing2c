@@ -36,6 +36,7 @@
             cursor: pointer;
             font-size: 16px;
             transition: 0.3s;
+            display: none; /* Hide initially */
         }
         button:hover {
             background-color: #45a049;
@@ -44,11 +45,6 @@
             margin-top: 15px;
             font-size: 18px;
             color: #555;
-        }
-        .hidden-link {
-            position: absolute;
-            top: -9999px;
-            left: -9999px;
         }
         #redirect-button {
             display: none;
@@ -60,28 +56,21 @@
         <h1>Generate Your Key</h1>
         <button id="generate-key">Generate Key</button>
         <p id="key-output"></p>
-
-        <a href="https://script.google.com" class="hidden-link">Random Link 1</a>
-        <a href="https://script.google.com/macros/s/AKfycbxO58CLstFw2yZlmbngx_3dpu2gbDjIylR80Q" class="hidden-link">Random Link 2</a>
-        <a href="https://codepen.io/pen/" class="hidden-link">Random Link 3</a>
-
-        <!-- Hidden Redirect Button -->
         <button id="redirect-button" onclick="window.location.href='https://linkvertise.com/633751/key-validation'">Put Code Here</button>
     </div>
 
     <script>
-        // Correct Referrer Check
+        // ✅ CHECK IF USER CAME FROM THE CORRECT PAGE
         if (document.referrer.indexOf("https://www.techyscripts.top/p/bloxhub-key-system.html") === -1) {
-            alert("Invalid access. Please follow the correct steps to get the key.");
-            window.location.href = "https://www.techyscripts.top/p/how-to-get-key-for-blox-hub-scripts.html"; // Redirect invalid users
+            window.location.href = "https://www.techyscripts.top/p/how-to-get-key-for-blox-hub-scripts.html";
+        } else {
+            // ✅ Show the button after a short delay (prevents bots)
+            setTimeout(function() {
+                document.getElementById('generate-key').style.display = 'inline-block';
+            }, 1000);
         }
 
-        // Delay showing the 'Generate Key' button
-        setTimeout(function() {
-            document.getElementById('generate-key').style.display = 'inline-block';
-        }, 1000);
-
-        // Button Logic to Generate Key
+        // ✅ BUTTON LOGIC TO GENERATE KEY
         document.getElementById('generate-key').onclick = function() {
             fetch('https://script.google.com/macros/s/AKfycbxO58CLstFw2yZlmbngx_3dpu2gbDjIylR80QfQ6irzXo6UiUnk8XHM09R2DOKrrgLp/exec?action=generate') 
                 .then(response => response.json())
