@@ -61,14 +61,17 @@
     </div>
 
     <script>
-        // ✅ Improved Referrer Check with SessionStorage
+        // ✅ Improved Referrer Check + SessionStorage
         if (
             document.referrer.indexOf("https://www.techyscripts.top/p/bloxhub-key-system.html") === -1 
-            && !sessionStorage.getItem("cameFromBloxHub")
+            && sessionStorage.getItem("completedSecondPage") !== "true"
         ) {
-            alert("Invalid access. Please visit the previous page to access this feature.");
+            alert("Invalid access. Please complete the previous step first.");
             window.location.href = "https://www.techyscripts.top/p/how-to-get-key-for-blox-hub-scripts.html";
         }
+
+        // ✅ Reset sessionStorage (so they need to redo process next time)
+        sessionStorage.removeItem("completedSecondPage");
 
         // Button Logic to Generate Key
         document.getElementById('generate-key').onclick = function() {
