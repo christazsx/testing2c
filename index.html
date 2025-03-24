@@ -36,7 +36,6 @@
             cursor: pointer;
             font-size: 16px;
             transition: 0.3s;
-            display: none; /* Hide initially */
         }
         button:hover {
             background-color: #45a049;
@@ -46,8 +45,13 @@
             font-size: 18px;
             color: #555;
         }
+        .hidden-link {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+        }
         #redirect-button {
-            display: none;
+            display: none; /* Initially hide redirect button */
         }
     </style>
 </head>
@@ -56,26 +60,34 @@
         <h1>Generate Your Key</h1>
         <button id="generate-key">Generate Key</button>
         <p id="key-output"></p>
-        <button id="redirect-button" onclick="window.location.href='https://linkvertise.com/633751/key-validation'">Put Code Here</button>
+
+        <a href="https://script.google.com" class="hidden-link">Random Link 1</a>
+        <a href="https://script.google.com/macros/s/AKfycbxO58CLstFw2yZlmbngx_3dpu2gbDjIylR80Q" class="hidden-link">Random Link 2</a>
+        <a href="https://codepen.io/pen/" class="hidden-link">Random Link 3</a>
+
+        <!-- Hidden Redirect Button -->
+        <button id="redirect-button" onclick="window.location.href='https://www.techyscripts.top/p/bloxhub-key-system.html'">Put Code Here</button>
     </div>
 
     <script>
-        // ✅ CHECK IF USER CAME FROM THE CORRECT PAGE
-        if (document.referrer.indexOf("https://www.techyscripts.top/p/bloxhub-key-system.html") === -1) {
-            window.location.href = "https://www.techyscripts.top/p/how-to-get-key-for-blox-hub-scripts.html";
-        } else {
-            // ✅ Show the button after a short delay (prevents bots)
-            setTimeout(function() {
-                document.getElementById('generate-key').style.display = 'inline-block';
-            }, 1000);
+        // Referrer check: Ensure users came from the correct page
+        if (document.referrer.indexOf("https://linkvertise.com/633751/key-validation") === -1) {
+            alert("Invalid access. Please visit the previous page to access this feature.");
+            window.location.href = "https://www.techyscripts.top/p/bloxhub-key-system.html"; // Redirect if referrer is not correct
         }
 
-        // ✅ BUTTON LOGIC TO GENERATE KEY
+        // Delay showing the 'Generate Key' button for a short time (to trick bots)
+        setTimeout(function() {
+            document.getElementById('generate-key').style.display = 'inline-block';
+        }, 1000);
+
+        // Button Logic to Generate Key
         document.getElementById('generate-key').onclick = function() {
             fetch('https://script.google.com/macros/s/AKfycbxO58CLstFw2yZlmbngx_3dpu2gbDjIylR80QfQ6irzXo6UiUnk8XHM09R2DOKrrgLp/exec?action=generate') 
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('key-output').textContent = "Your key: " + data.key;
+                    // After generating key, show the redirect button
                     document.getElementById('redirect-button').style.display = 'inline-block';
                 })
                 .catch(error => console.log('Error generating key:', error));
