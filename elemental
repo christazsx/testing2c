@@ -1,0 +1,660 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Elemental Power Tycoon",
+    Icon = 0,
+    LoadingTitle = "Elemental Power Tycoon",
+    LoadingSubtitle = "By BloxVid",
+    Theme = "Serenity", 
+ 
+    DisableRayfieldPrompts = true,
+    DisableBuildWarnings = true,
+ 
+    ConfigurationSaving = {
+       Enabled = false,
+       FolderName = nil, 
+       FileName = "Big Hub"
+    },
+ 
+    Discord = {
+       Enabled = true, 
+       Invite = "ybAgYq3eUF", 
+       RememberJoins = true 
+    },
+ 
+    KeySystem = false,
+    KeySettings = {
+       Title = "Untitled",
+       Subtitle = "Key System",
+       Note = "No method of obtaining the key is provided",
+       FileName = "Key",
+       SaveKey = true,
+       GrabKeyFromSite = false,
+       Key = {"Hello"}
+    }
+ })
+
+ local MainTab = Window:CreateTab("🦸Local Player", 0) 
+ local MainSection = MainTab:CreateSection("Edit Local Player Stats")
+
+ local OtherTab = Window:CreateTab("👨‍🌾Farming", 0)
+ local OtherSection = OtherTab:CreateSection("Farm Money")
+
+ local CombatTab = Window:CreateTab("⚔️Combat", 0) 
+ local CombatSection = CombatTab:CreateSection("Combat Advantage")
+
+
+ local Slider = MainTab:CreateSlider({
+    Name = "WalkSpeed",
+    Range = {16, 160},
+    Increment = 16,
+    Suffix = "WalkSpeed",
+    CurrentValue = 16,
+    Flag = "WalkSpeedSlider",
+    Callback = function(Value)
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        if character and character:FindFirstChild("Humanoid") then
+            local humanoid = character:FindFirstChild("Humanoid")
+            humanoid.WalkSpeed = Value 
+        end
+    end,
+})
+
+local Slider1 = MainTab:CreateSlider({
+    Name = "JumpPower",
+    Range = {50, 400},
+    Increment = 5,
+    Suffix = "JumpPower",
+    CurrentValue = 50,
+    Flag = "JumpPowerSlider",
+    Callback = function(Value)
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        if character and character:FindFirstChild("Humanoid") then
+            local humanoid = character:FindFirstChild("Humanoid")
+            humanoid.JumpPower = Value
+        end
+    end,
+})
+
+local noclip = false
+local connection
+
+local Toggle1 = MainTab:CreateToggle({
+	Name = "Noclip",
+	CurrentValue = false,
+	Flag = "NoclipToggle",
+	Callback = function(Value)
+		local Players = game:GetService("Players")
+		local RunService = game:GetService("RunService")
+		local LocalPlayer = Players.LocalPlayer
+		local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+
+		noclip = Value
+
+		if noclip then
+			connection = RunService.Stepped:Connect(function()
+				for _, part in ipairs(Character:GetDescendants()) do
+					if part:IsA("BasePart") then
+						part.CanCollide = false
+					end
+				end
+			end)
+		else
+			if connection then
+				connection:Disconnect()
+				connection = nil
+			end
+
+			for _, part in ipairs(Character:GetDescendants()) do
+				if part:IsA("BasePart") then
+					pcall(function()
+						part.CanCollide = true
+					end)
+				end
+			end
+		end
+	end,
+})
+
+
+ 
+local flying = false
+local bv, bg, connection, inputBeganConn, inputEndedConn
+local originalVelocity, originalPlatformStand
+
+local Toggle2 = MainTab:CreateToggle({
+	Name = "Fly",
+	CurrentValue = false,
+	Flag = "FlyToggle",
+	Callback = function(Value)
+		local Players = game:GetService("Players")
+		local UIS = game:GetService("UserInputService")
+		local RunService = game:GetService("RunService")
+		local LocalPlayer = Players.LocalPlayer
+		local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+		local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+		local Humanoid = Character:WaitForChild("Humanoid")
+
+		local speed = 60
+		local keys = {W = false, A = false, S = false, D = false}
+
+		flying = Value
+
+		if flying then
+			originalVelocity = HumanoidRootPart.Velocity
+			originalPlatformStand = Humanoid.PlatformStand
+
+			Humanoid.PlatformStand = true
+
+			inputBeganConn = UIS.InputBegan:Connect(function(input, gameProcessed)
+				if gameProcessed then return end
+				local key = input.KeyCode.Name
+				if keys[key] ~= nil then keys[key] = true end
+			end)
+
+			inputEndedConn = UIS.InputEnded:Connect(function(input)
+				local key = input.KeyCode.Name
+				if keys[key] ~= nil then keys[key] = false end
+			end)
+
+			bv = Instance.new("BodyVelocity")
+			bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+			bv.P = 1250
+			bv.Velocity = Vector3.zero
+			bv.Parent = HumanoidRootPart
+
+			bg = Instance.new("BodyGyro")
+			bg.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
+			bg.P = 3000
+			bg.D = 500
+			bg.CFrame = HumanoidRootPart.CFrame
+			bg.Parent = HumanoidRootPart
+
+			connection = RunService.RenderStepped:Connect(function()
+				if not flying then return end
+				local cam = workspace.CurrentCamera
+				local dir = Vector3.new(
+					(keys.D and 1 or 0) - (keys.A and 1 or 0),
+					0,
+					(keys.S and 1 or 0) - (keys.W and 1 or 0)
+				)
+
+				if dir.Magnitude > 0 then
+					dir = cam.CFrame:VectorToWorldSpace(dir).Unit
+				end
+
+				bv.Velocity = dir * speed
+				bg.CFrame = cam.CFrame
+			end)
+		else
+			if connection then connection:Disconnect() end
+			if inputBeganConn then inputBeganConn:Disconnect() end
+			if inputEndedConn then inputEndedConn:Disconnect() end
+			if bv then bv:Destroy() end
+			if bg then bg:Destroy() end
+
+			Humanoid.PlatformStand = originalPlatformStand or false
+			HumanoidRootPart.Velocity = originalVelocity or Vector3.zero
+			HumanoidRootPart.Anchored = false
+
+			task.delay(0.05, function()
+				if Humanoid and Humanoid.Health > 0 then
+					Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+					task.wait(0.1)
+					Humanoid:ChangeState(Enum.HumanoidStateType.Running)
+				end
+			end)
+		end
+	end,
+})
+
+local autofarmEnabled = false
+
+local Toggle = OtherTab:CreateToggle({
+   Name = "Autofarm",
+   CurrentValue = false,
+   Flag = "AutofarmToggle",
+   Callback = function(Value)
+   autofarmEnabled = Value
+   if not Value then return end
+
+	Rayfield:Notify({
+   			Title = "Recommendation",
+   			Content = "Reset and Disable combat mode then hide the interface by pressing K on your keyboard!",
+   			Duration = 13,
+   			Image = 0,
+			})
+
+   local Players = game:GetService("Players")
+   local player = Players.LocalPlayer
+
+   local function getCharacter()
+       while true do
+           local char = player.Character or player.CharacterAdded:Wait()
+           local root = char:FindFirstChild("HumanoidRootPart") or char:WaitForChild("HumanoidRootPart", 5)
+           if root then return char end
+           wait(0.5)
+       end
+   end
+
+   local function safeTeleport(targetCFrame)
+       local char = getCharacter()
+       char:SetPrimaryPartCFrame(targetCFrame)
+   end
+
+   local function startAutoFarm()
+       local leaderstats = player:WaitForChild("leaderstats")
+       local money = leaderstats:WaitForChild("Money")
+
+       local function getTycoon()
+           return workspace.Tycoons:FindFirstChild(player.Name)
+       end
+
+       local function canAffordButton(button)
+           local price = button:GetAttribute("Price")
+           return price and money.Value >= price
+       end
+
+       local function teleportToButton(button)
+           local buttonPart = button:FindFirstChild("Button")
+           if buttonPart and buttonPart:IsA("BasePart") then
+               safeTeleport(CFrame.new(buttonPart.Position + Vector3.new(0, 5, 0)))
+           end
+       end
+
+       local function touchButton(button)
+           local buttonPart = button:FindFirstChild("Button")
+           if buttonPart and buttonPart:IsA("BasePart") then
+               safeTeleport(buttonPart.CFrame)
+               wait(0.5)
+               button:Destroy()
+           end
+       end
+
+       local function fixOrientation()
+           local root = getCharacter():FindFirstChild("HumanoidRootPart")
+           if root then
+               root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(90), 0)
+           end
+       end
+
+       local function processButtons()
+           while autofarmEnabled do
+               local tycoon = getTycoon()
+               if not tycoon then return end
+
+               local buttonsFolder = tycoon:FindFirstChild("Buttons")
+               local auxiliaryFolder = tycoon:FindFirstChild("Auxiliary")
+               local collector = auxiliaryFolder and auxiliaryFolder:FindFirstChild("Collector"):FindFirstChild("Collect")
+
+               local affordableButtons = {}
+
+               for _, button in pairs(buttonsFolder:GetChildren()) do
+                   if button:IsA("Model") and canAffordButton(button) then
+                       table.insert(affordableButtons, button)
+                   end
+               end
+
+               if #affordableButtons > 0 then
+                   local selected = affordableButtons[math.random(1, #affordableButtons)]
+                   teleportToButton(selected)
+                   touchButton(selected)
+                   wait(2)
+                   fixOrientation()
+               else
+                   if #buttonsFolder:GetChildren() == 0 then
+                       print("All buttons are gone. Starting rebirth flow...")
+                       wait(3)
+                       if autofarmEnabled then
+                           triggerRebirth()
+                       end
+                       return
+                   end
+                   if collector then
+                       safeTeleport(collector.CFrame + Vector3.new(0, 3, 0))
+                   end
+                   wait(2)
+               end
+           end
+       end
+
+       print("Starting autofarm...")
+       processButtons()
+   end
+
+   function triggerRebirth()
+       if not autofarmEnabled then return end
+       local button = workspace.Tycoons[player.Name].Auxiliary.Rebirth.Button
+       local prompt = button:WaitForChild("ProximityPrompt")
+       prompt.HoldDuration = 0
+       safeTeleport(button.CFrame + Vector3.new(0, 5, 0))
+       wait(1)
+       fireproximityprompt(prompt)
+       wait(3)
+       teleportToFreeTycoon()
+   end
+
+   function teleportToFreeTycoon()
+       if not autofarmEnabled then return end
+       local tycoonsFolder = workspace.Tycoons
+       if not tycoonsFolder:FindFirstChild(player.Name) then
+           for _, child in pairs(tycoonsFolder:GetChildren()) do
+               if child.Name == "Claim" and child:IsA("Model") then
+                   local auxiliary = child:FindFirstChild("Auxiliary")
+                   local door = auxiliary and auxiliary:FindFirstChild("Door")
+                   local doorPart = door and door:FindFirstChildOfClass("Part")
+                   if doorPart then
+                       safeTeleport(CFrame.new(doorPart.Position + Vector3.new(0, 5, 0)))
+                       break
+                   end
+               end
+           end
+       end
+       wait(3)
+       selectNewTycoon()
+   end
+
+   function selectNewTycoon()
+       if not autofarmEnabled then return end
+       print("[Tycoon Selector] Selecting new tycoon...")
+
+       local guiFrame = player.PlayerGui:WaitForChild("SelectionUI")
+           :WaitForChild("SelectionFrame")
+           :WaitForChild("ScrollingFrame"):WaitForChild("1")
+
+       local vim = game:GetService("VirtualInputManager")
+
+       for i = 1, 15 do
+           local frame = guiFrame:FindFirstChild(tostring(i))
+
+           if frame and frame:IsA("ViewportFrame") then
+               local lockLabel = frame:FindFirstChild("LockLabel")
+               local imageButton = frame:FindFirstChildOfClass("ImageButton")
+
+               if lockLabel and imageButton and lockLabel.Visible == false then
+                   print("[Tycoon Selector] Unlocked tycoon found at frame:", i)
+
+                   local absPos = imageButton.AbsolutePosition
+                   local absSize = imageButton.AbsoluteSize
+                   local centerPos = absPos + (absSize / 2)
+
+                   vim:SendMouseButtonEvent(centerPos.X, centerPos.Y, 0, true, game, 0)
+                   wait()
+                   vim:SendMouseButtonEvent(centerPos.X, centerPos.Y, 0, false, game, 0)
+
+                   print("[Tycoon Selector] Clicked and selected tycoon at frame:", i)
+                   wait(3)
+                   startAutoFarm()
+                   return
+               end
+           end
+       end
+
+       warn("[Tycoon Selector] No unlocked tycoon found.")
+   end
+
+   startAutoFarm()
+   end,
+})
+
+
+local Button = OtherTab:CreateButton({
+   Name = "Collect Chest's and BalloonCrate's",
+   Callback = function()
+    local Players = game:GetService("Players")
+	local player = Players.LocalPlayer
+	local function getCharacter()
+    while true do
+        local char = player.Character or player.CharacterAdded:Wait()
+        local root = char:FindFirstChild("HumanoidRootPart") or char:WaitForChild("HumanoidRootPart", 5)
+        if root then return char end
+        task.wait(0.2)
+    	end
+	end
+
+	local function safeTeleport(cframe)
+    	local char = getCharacter()
+    	char:SetPrimaryPartCFrame(cframe)
+	end
+
+	local function collectChest(part)
+    	if part:IsA("BasePart") and part:FindFirstChildOfClass("ProximityPrompt") then
+       	 print("[Chest] Teleporting to:", part.Name)
+        	safeTeleport(part.CFrame + Vector3.new(0, 4, 0))
+       	 task.wait(0.5)
+       	 local prompt = part:FindFirstChildOfClass("ProximityPrompt")
+       	 prompt.HoldDuration = 0
+       	 fireproximityprompt(prompt)
+       	 task.wait(1)
+    	else
+        	warn("[Chest] Skipped, no prompt or not a part:", part.Name)
+    	end
+	end
+
+	local function collectBalloonCrates()
+    	for _, crate in ipairs(workspace:GetChildren()) do
+        	if crate:IsA("Model") and crate.Name == "BalloonCrate" then
+            	local cratePart = crate:FindFirstChild("Crate")
+            	local prompt = cratePart and cratePart:FindFirstChildOfClass("ProximityPrompt")
+            	if cratePart and prompt then
+                	print("[BalloonCrate] Teleporting to:", crate.Name)
+                	safeTeleport(cratePart.CFrame + Vector3.new(0, 4, 0))
+                	task.wait(0.5)
+                	prompt.HoldDuration = 0
+                	fireproximityprompt(prompt)
+                	task.wait(1)
+            	else
+                	warn("[BalloonCrate] Missing Crate or prompt in:", crate.Name)
+            	end
+        	end
+    	end
+	end
+
+	local function collectChests()
+		local chestFolder = workspace:FindFirstChild("Treasure") and workspace.Treasure:FindFirstChild("Chests")
+		if not chestFolder then
+			warn("workspace.Treasure.Chests not found.")
+			return
+		end
+
+		for _, item in ipairs(chestFolder:GetChildren()) do
+			collectChest(item)
+		end
+	end
+
+	task.spawn(function()
+		collectChests()
+		collectBalloonCrates()
+		print("[Collectibles Script] Done. Cleaning up...")
+		task.wait(2)
+		script:Destroy()
+		end)
+	end,
+})
+
+local Button = CombatTab:CreateButton({
+	Name = "Get Tools/Abillities",
+	Callback = function()
+		local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local Tycoons = workspace:WaitForChild("Tycoons")
+
+local function getCharacter()
+    while true do
+        local char = player.Character or player.CharacterAdded:Wait()
+        local root = char:FindFirstChild("HumanoidRootPart") or char:WaitForChild("HumanoidRootPart", 5)
+        if root then return char end
+        task.wait(0.2)
+    end
+end
+
+local function safeTeleport(cframe)
+    local char = getCharacter()
+    char:SetPrimaryPartCFrame(cframe)
+end
+
+local function isClaimedTycoon(tycoon)
+    return tycoon:IsA("Model") and tycoon.Name ~= "Claim"
+end
+
+local function processTycoon(tycoon)
+    local assets = tycoon:FindFirstChild("Assets")
+    if not assets then return end
+
+    for i = 1, 7 do
+        local ability = assets:FindFirstChild("Ability" .. i)
+        if ability and ability:IsA("Model") then
+            local button = ability:FindFirstChild("Button")
+            if button and button:IsA("BasePart") then
+                local success, err = pcall(function()
+                    safeTeleport(button.CFrame + Vector3.new(0, 4, 0))
+                    task.wait(0.1)
+                end)
+                if not success then
+                    warn("[ERROR] Teleport failed:", err)
+                    return false
+                end
+            end
+        end
+    end
+
+    return true
+end
+
+local function lootAllTycoons()
+    local tycoons = {}
+    for _, t in ipairs(Tycoons:GetChildren()) do
+        if isClaimedTycoon(t) then
+            table.insert(tycoons, t)
+        end
+    end
+
+    local index = 1
+    while index <= #tycoons do
+        local success = processTycoon(tycoons[index])
+        if success then
+            index += 1
+        else
+            print("[INFO] Died mid-loot. Waiting to respawn...")
+            player.CharacterAdded:Wait()
+            task.wait(1.5)
+        end
+    end
+
+    print("[LOOTING COMPLETE] Killing self...")
+    local char = getCharacter()
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if hum then
+        hum.Health = 0
+    end
+end
+
+task.spawn(lootAllTycoons)
+
+	end,
+ })
+
+
+
+ local Toggle = CombatTab:CreateToggle({
+   Name = "Player ESP",
+   CurrentValue = false,
+   Flag = "PlayerESP",
+   Callback = function(Value)
+      local FillColor = Color3.fromRGB(175, 25, 255)
+      local DepthMode = "AlwaysOnTop"
+      local FillTransparency = 0.5
+      local OutlineColor = Color3.fromRGB(255, 255, 255)
+      local OutlineTransparency = 0
+
+      local CoreGui = game:FindService("CoreGui")
+      local Players = game:FindService("Players")
+      local lp = Players.LocalPlayer
+
+      local connections = {}
+      local Storage = CoreGui:FindFirstChild("Highlight_Storage")
+
+      if not Value then
+         if Storage then
+            Storage:Destroy()
+         end
+         for _, conn in pairs(connections) do
+            if typeof(conn) == "RBXScriptConnection" then
+               conn:Disconnect()
+            end
+         end
+         connections = {}
+         return
+      end
+
+      Storage = Instance.new("Folder")
+      Storage.Name = "Highlight_Storage"
+      Storage.Parent = CoreGui
+
+      local function Highlight(plr)
+         if plr == lp then return end
+         local Highlight = Instance.new("Highlight")
+         Highlight.Name = plr.Name
+         Highlight.FillColor = FillColor
+         Highlight.DepthMode = DepthMode
+         Highlight.FillTransparency = FillTransparency
+         Highlight.OutlineColor = OutlineColor
+         Highlight.OutlineTransparency = OutlineTransparency
+         Highlight.Parent = Storage
+
+         local plrchar = plr.Character
+         if plrchar then
+            Highlight.Adornee = plrchar
+         end
+
+         connections[plr] = plr.CharacterAdded:Connect(function(char)
+            Highlight.Adornee = char
+         end)
+      end
+
+      for _, player in pairs(Players:GetPlayers()) do
+         Highlight(player)
+      end
+
+      connections["_join"] = Players.PlayerAdded:Connect(function(player)
+         Highlight(player)
+      end)
+
+      connections["_leave"] = Players.PlayerRemoving:Connect(function(player)
+         if Storage:FindFirstChild(player.Name) then
+            Storage[player.Name]:Destroy()
+         end
+         if connections[player] then
+            connections[player]:Disconnect()
+            connections[player] = nil
+         end
+      end)
+   end,
+})
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextChatService = game:GetService("TextChatService")
+
+local function chatMessage(str)
+    str = tostring(str)
+    if TextChatService.ChatVersion == Enum.ChatVersion.LegacyChatService then
+        ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(str, "All")
+    else
+        TextChatService:WaitForChild("TextChannels"):WaitForChild("RBXGeneral"):SendAsync(str)
+    end
+end
+
+chatMessage("[GET SCRIPT] Go to >> lc.cx/zmQ_Y4")
+chatMessage("Script by BloxVid")
+
+while true do
+	Rayfield:Notify({
+   		Title = "Discord and Website",
+   		Content = "Dont Forget to join our discord at .gg/ybAgYq3eUF Also check out our website for more scripts at techyscripts.top",
+   		Duration = 13,
+   		Image = 0,
+		})
+    task.wait(180)
+end
